@@ -52,20 +52,26 @@ create.second_order <- function(X, method=c("asdp","equi","sdp"), shrink=F) {
   mu = colMeans(X)
 
   # Estimate the covariance matrix
-  if(!shrink) {
-    Sigma = cov(X)
-    # Verify that the covariance matrix is positive-definite
-    if(!is_posdef(Sigma)) {
-      shrink=TRUE
+  if (!shrink) {
+    # Make sure that cov(X) is positive definite
+    # If not, force shrinking
+    if (!is_posdef_covx(X)) {
+      shrink = TRUE
     }
   }
-  if(shrink) {
-    if (!requireNamespace('corpcor', quietly=T))
-      stop('corpcor is not installed', call.=F)
-    Sigma = tryCatch({suppressWarnings(matrix(as.numeric(corpcor::cov.shrink(X,verbose=F)), nrow=ncol(X)))},
-                     warning = function(w){}, error = function(e) {
-                       stop("SVD failed in the shrinkage estimation of the covariance matrix. Try upgrading R to version >= 3.3.0")
-                     }, finally = {})
+  if (shrink) {
+    if (!requireNamespace('corpcor', quietly=TRUE))
+      stop('corpcor is not installed', call.=FALSE)
+    Sigma = tryCatch(
+      {suppressWarnings(matrix(as.numeric(corpcor::cov.shrink(X, verbose=FALSE)), nrow=ncol(X)))},
+      warning = function(w) {},
+      error = function(e) {
+        stop("SVD failed in the shrinkage estimation of the covariance matrix. Try upgrading R to version >= 3.3.0")
+      },
+      finally = {}
+    )
+  } else {
+    Sigma = cov(X)
   }
 
   # Sample the Gaussian knockoffs
