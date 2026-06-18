@@ -31,7 +31,7 @@
 #' 
 #' @examples
 #' set.seed(2022)
-#' p=100; n=200; k=15
+#' p=50; n=100; k=15
 #' X = matrix(rnorm(n*p),n)
 #' nonzero = sample(p, k)
 #' beta = 5.5 * (1:p %in% nonzero)
